@@ -1,0 +1,26 @@
+start(-54,20);
+go(1);
+for (let i=0; i<4; i++){
+  pillars(13, 2, 1, UP);
+}
+left(90);
+go(18);
+left(90);
+go(1)
+for (let i=0; i<4; i++){
+  pillars(13, 2, 1, UP);
+}
+left(90);
+go(37);
+left(90);
+go(1)
+for (let i=0; i<4; i++){
+  pillars(13, 2, 1, UP);
+}
+left(90);
+go(18);
+left(90);
+go(1)
+for (let i=0; i<4; i++){
+  pillars(13, 2, 1, UP);
+}
