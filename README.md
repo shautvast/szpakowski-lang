@@ -36,3 +36,14 @@ What is it?
 
 ### Run
 * npm run start
+
+* the console has code completion, but right now it's limited: only once there is only 1 alternative,
+you can press tab to complete.
+* the interpreter is based on 'Lox' from the 'Crafting Interpreters' book.
+* use `var` to declare a variable
+* `print(...)` prints to the console
+* statements must end with ';' (//TODO remove)
+* not yet:
+  * loops
+  * branching
+
