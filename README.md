@@ -10,7 +10,7 @@ What is it?
 * Think _Logo_, the 'turtle' language from the eighties.
 * Because Szpakowski's drawings all follow the principle of the single line.
 * it has the basic commands to move the turtle:
-- start(x,y)
+- start(x,y): You MUST have this as first statement.
 - go(distance)
 - left(degrees)
 - right(degrees)
