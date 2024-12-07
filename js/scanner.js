@@ -241,6 +241,7 @@ export const RIGHT = 41;
 export const PILLARS = 42;
 export const MOVING_PILLARS = 43;
 export const STAIRCASE = 44;
+export const REPEAT = 45;
 
 export const keywords = new Map([
   ["and", AND],
@@ -262,5 +263,6 @@ export const keywords = new Map([
   ["right", RIGHT],
   ["pillars", PILLARS],
   ["moving_pillars", MOVING_PILLARS],
-  ["staircase", STAIRCASE]
+  ["staircase", STAIRCASE],
+  ["repeat", REPEAT],
 ])

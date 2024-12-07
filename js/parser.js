@@ -1,14 +1,42 @@
 import "./scanner";
 import {
-  scan, error,
-  BANG, BANG_EQUAL, EOF,
-  EQUAL, EQUAL_EQUAL,
-  FALSE, GREATER,
-  GREATER_EQUAL, IDENTIFIER,
-  LEFT_BRACE, LEFT_PAREN, LESS,
-  LESS_EQUAL, MINUS, NUMBER, PLUS,
-  PRINT, RIGHT_BRACE, RIGHT_PAREN,
-  SEMICOLON, SLASH, STAR, STRING, TRUE, VAR, START, COMMA, GO, STAIRCASE, PILLARS, MOVING_PILLARS, LEFT, RIGHT, TURN
+  scan,
+  error,
+  BANG,
+  BANG_EQUAL,
+  EOF,
+  EQUAL,
+  EQUAL_EQUAL,
+  FALSE,
+  GREATER,
+  GREATER_EQUAL,
+  IDENTIFIER,
+  LEFT_BRACE,
+  LEFT_PAREN,
+  LESS,
+  LESS_EQUAL,
+  MINUS,
+  NUMBER,
+  PLUS,
+  PRINT,
+  RIGHT_BRACE,
+  RIGHT_PAREN,
+  SEMICOLON,
+  SLASH,
+  STAR,
+  STRING,
+  TRUE,
+  VAR,
+  START,
+  COMMA,
+  GO,
+  STAIRCASE,
+  PILLARS,
+  MOVING_PILLARS,
+  LEFT,
+  RIGHT,
+  TURN,
+  REPEAT
 } from "./scanner";
 
 export function parse(code) {
@@ -38,7 +66,7 @@ export function parse(code) {
       initializer = expression();
     }
     consume(SEMICOLON, "Expected semicolon");
-    return {accept: (visitor) => visitor.visitVariableStatement(name, initializer)};
+    return {class: "var", name:name, initializer: initializer, accept: (visitor) => visitor.visitVariableStatement(name, initializer)};
   }
 
   const statement = () => {
@@ -69,8 +97,12 @@ export function parse(code) {
     if (match(MOVING_PILLARS)) {
       return callStatement("moving_pillars");
     }
+    if (match(REPEAT)){
+      return call_block();
+    }
     if (match(LEFT_BRACE)) {
-      return {accept: (visitor) => visitor.visitBlockStatement(block())};
+      const blockStatement = block();
+      return {class: "block", accept: (visitor) => visitor.visitBlockStatement(blockStatement)};
     }
 
     return expressionStatement();
@@ -80,7 +112,7 @@ export function parse(code) {
     return assignment();
   }
 
-  const expressions = () => {
+  const arg_expressions = () => {
     consume(LEFT_PAREN, "Expect '('");
     let exprs = [expression()];
     while (match(COMMA)) {
@@ -98,7 +130,7 @@ export function parse(code) {
 
       if (expr.class === 'Variable') {
         let name = expr.name;
-        return {accept: (visitor) => visitor.visitAssignExpr(name, value)};
+        return {class: "assign", var_name: name, init_expr: value, accept: (visitor) => visitor.visitAssignExpr(name, value)};
       }
 
       throw error(equals, "Invalid assignment target.");
@@ -109,19 +141,26 @@ export function parse(code) {
   const printStatement = () => {
     const value = expression();
     consume(SEMICOLON, "Expected semicolon");
-    return {accept: (visitor) => visitor.visitPrintStatement(value)};
+    return {class: "print", value: value, accept: (visitor) => visitor.visitPrintStatement(value)};
   }
 
   const callStatement = (name) => {
-    const values = expressions();
+    const args = arg_expressions();
     consume(SEMICOLON, "Expected semicolon");
-    return {accept: (visitor) => visitor.visitCallStatement(name, values)};
+    return {class: "call", accept: (visitor) => visitor.visitCallStatement(name, args)};
+  }
+
+  const call_block = () =>{
+    const args = arg_expressions();
+    consume(LEFT_BRACE, "Expect block");
+    const action = block();
+    return {class: "block", accept: (visitor)=> visitor.visitParametrizedBlock(args, action)};
   }
 
   const expressionStatement = () => {
     const value = expression();
     consume(SEMICOLON, "Expected semicolon");
-    return {accept: (visitor) => visitor.visitExpressionStatement(value)};
+    return {class: "expressionStatement", expression: value, accept: (visitor) => visitor.visitExpressionStatement(value)};
   }
 
   const block = () => {
@@ -138,7 +177,8 @@ export function parse(code) {
     while (match(BANG_EQUAL, EQUAL_EQUAL)) {
       let operator = previous();
       let right = comparison();
-      expr = {accept: (visitor) => visitor.visitBinaryExpr(operator, expr, right)};
+      const left = expr;
+      expr = {class: "binaryExpr", operator: operator, left: expr, right: right, accept: (visitor) => visitor.visitBinaryExpr(operator, left, right)};
     }
     return expr;
   }
@@ -148,7 +188,8 @@ export function parse(code) {
     while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
       let operator = previous();
       let right = term();
-      expr = {accept: (visitor) => visitor.visitBinaryExpr(operator, expr, right)};
+      const left = expr;
+      expr = {class: "binaryExpr", operator: operator, left: expr, right: right, accept: (visitor) => visitor.visitBinaryExpr(operator, left, right)};
     }
     return expr;
   }
@@ -158,7 +199,8 @@ export function parse(code) {
     while (match(MINUS, PLUS)) {
       let operator = previous();
       let right = factor();
-      expr = {accept: (visitor) => visitor.visitBinaryExpr(operator, expr, right)};
+      const left = expr;
+      expr = {class: "binaryExpr", operator: operator, left: expr, right: right, accept: (visitor) => visitor.visitBinaryExpr(operator, left, right)};
     }
     return expr;
   }
@@ -168,7 +210,8 @@ export function parse(code) {
     while (match(SLASH, STAR)) {
       let operator = previous();
       let right = unary();
-      expr = {accept: (visitor) => visitor.visitBinaryExpr(operator, expr, right)};
+      const left = expr;
+      expr = {class: "binaryExpr", operator: operator, left: expr, right: right, accept: (visitor) => visitor.visitBinaryExpr(operator, left, right)};
     }
     return expr;
   }
@@ -177,36 +220,36 @@ export function parse(code) {
     if (match(BANG, MINUS)) {
       let operator = previous();
       let right = unary();
-      return {accept: (visitor) => visitor.visitUnaryExpr(operator, right)};
+      return {class: "unaryExpr", operator: operator, right: right, accept: (visitor) => visitor.visitUnaryExpr(operator, right)};
     }
     return primary();
   }
 
   const primary = () => {
     if (match(FALSE)) {
-      return {accept: (visitor) => visitor.visitLiteralExpr(false)};
+      return {class: "boolean", value: false, accept: (visitor) => visitor.visitLiteralExpr(false)};
     }
     if (match(TRUE)) {
-      return {accept: (visitor) => visitor.visitLiteralExpr(true)};
+      return {class: "boolean", value: true, accept: (visitor) => visitor.visitLiteralExpr(true)};
     }
     if (check(NUMBER)) {
       advance();
       let number = parseFloat(previous().literal);
-      return {accept: (visitor) => visitor.visitLiteralExpr(number)};
+      return {class: "number", value:number, accept: (visitor) => visitor.visitLiteralExpr(number)};
     }
     if (check(STRING)) {
       advance();
       let string = previous().literal;
-      return {accept: (visitor) => visitor.visitLiteralExpr(string)};
+      return {class: "string", value: string, accept: (visitor) => visitor.visitLiteralExpr(string)};
     }
     if (match(IDENTIFIER)) {
       let identifier = previous();
-      return {class: "Variable", accept: (visitor) => visitor.visitVariableExpr(identifier)};
+      return {class: "Variable", identifier: identifier, accept: (visitor) => visitor.visitVariableExpr(identifier)};
     }
     if (match(LEFT_PAREN)) {
       let expr = expression();
       consume(RIGHT_PAREN, "Expect ')' after expression.");
-      return {accept: (visitor) => visitor.visitGroupingExpr(expr)};
+      return {class: "groupExpr", expression: expr, accept: (visitor) => visitor.visitGroupingExpr(expr)};
     }
     throw error(peek(), "Expect expression.");
   }
@@ -225,10 +268,12 @@ export function parse(code) {
         return true;
       }
     }
+
     return false;
   }
 
   const check = (type) => {
+    // console.log(peek().type+"==="+type);
     if (is_at_end()) {
       return false;
     }

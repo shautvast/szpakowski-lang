@@ -37,6 +37,30 @@ export function interpret(init_env, code) {
       THIS.executeBlock(statements, {enclosing: THIS.current_environment});
     },
 
+    visitParametrizedBlock: (argList, statements) => {
+      let args = argList.map(THIS.evaluate);
+      let start,end;
+      if (args.length===2){
+        start = args[0];
+        end = args[1];
+      } else {
+        start =0;
+        end = args[0];
+      }
+      let previous = THIS.current_environment;
+      THIS.current_environment = {enclosing: previous};
+      try {
+        for (let i = start; i < end; i++) {
+          THIS.current_environment.it = i;
+          for (let i = 0; i < statements.length; i++) {
+            THIS.execute(statements[i]);
+          }
+        }
+      } finally {
+        THIS.current_environment = previous;
+      }
+    },
+
     visitExpressionStatement: (expression) => {
       THIS.evaluate(expression);
     },
@@ -50,27 +74,43 @@ export function interpret(init_env, code) {
     },
 
     visitPrintStatement: (expression) => {
-      console.log(THIS.current_environment);
       let value = THIS.evaluate(expression);
       console.log(THIS.stringify(value));
     },
 
     visitCallStatement: (fun, argList) => {
       let args = argList.map(THIS.evaluate);
-      switch (fun){
-        case "start": THIS.start(...args); break;
-        case "go": THIS.go(...args); break;
-        case "turn": THIS.turn(...args); break;
-        case "left": THIS.left(...args); break;
-        case "right": THIS.right(...args); break;
-        case "pillars": THIS.pillars(...args); break;
-        case "moving_pillars": THIS.moving_pillars(...args); break;
-        case "staircase": THIS.staircase(...args); break;
-        default: throw "Unknown function: " + fun;
+      switch (fun) {
+        case "start":
+          THIS.start(...args);
+          break;
+        case "go":
+          THIS.go(...args);
+          break;
+        case "turn":
+          THIS.turn(...args);
+          break;
+        case "left":
+          THIS.left(...args);
+          break;
+        case "right":
+          THIS.right(...args);
+          break;
+        case "pillars":
+          THIS.pillars(...args);
+          break;
+        case "moving_pillars":
+          THIS.moving_pillars(...args);
+          break;
+        case "staircase":
+          THIS.staircase(...args);
+          break;
+        default:
+          throw "Unknown function: " + fun;
       }
     },
 
-    start: (x,y) => {
+    start: (x, y) => {
       tx = x * unit;
       ty = y * unit;
       tangle = 0;
@@ -129,7 +169,7 @@ export function interpret(init_env, code) {
       }
     },
 
-    staircase: (number_of_steps, size, direction = DOWN) =>{
+    staircase: (number_of_steps, size, direction = DOWN) => {
       const angle = direction === DOWN ? 90 : -90;
       for (let i = 0; i < number_of_steps; i++) {
         THIS.go(size);
@@ -151,9 +191,9 @@ export function interpret(init_env, code) {
       }
     },
 
-    visitBinaryExpr: (operator, _left, _right) => {
-      let left = THIS.evaluate(_left);
-      let right = THIS.evaluate(_right);
+    visitBinaryExpr: (operator, l, r) => {
+      let left = THIS.evaluate(l);
+      let right = THIS.evaluate(r);
 
       switch (operator.type) {
         case MINUS:
@@ -230,7 +270,6 @@ export function interpret(init_env, code) {
   try {
     const statements = parse(code);
     for (let i = 0; i < statements.length; i++) {
-
       THIS.execute(statements[i]);
     }
   } catch (e) {

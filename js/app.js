@@ -75,7 +75,7 @@ import {interpret} from "./interpreter.js";
 
     try {
       canvas.clearRect(0, 0, width, height);
-      interpret({canvas: canvas, x: tx, y: ty, angle: tangle, unit: 10, width, height}, script);
+      interpret({canvas: canvas, x: tx, y: ty, angle: tangle, unit: 10, width:width, height:height}, script);
     } catch (Exception) {
     }
   }
