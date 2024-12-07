@@ -29,6 +29,7 @@ import {interpret} from "./interpreter.js";
     {v1: "pillars(number, length, shift = 0, direction = UP)", v2: "pillars(3, 10, 0, DOWN);"},
     {v1: "moving_pillars(number, length, shift = 0, direction = DOWN)", v2: "moving_pillars(3, 10, 0, DOWN);"},
     {v1: "staircase(number, size, direction = DOWN)", v2: "staircase(3, 1, DOWN);"},
+    {v1: "repeat([start], end){...}", v2: "repeat(5){\n}"},
   ];
   const slices = {};
   for (let i = 0; i < help.length; i++) {

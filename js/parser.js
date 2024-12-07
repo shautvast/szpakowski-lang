@@ -46,8 +46,14 @@ export function parse(code) {
 
   const parse = () => {
     let statements = [];
+
     while (!is_at_end()) {
-      statements.push(declaration());
+      try {
+        statements.push(declaration());
+      } catch (e) {
+        console.log(e);
+        current = tokens.length - 1; // stop compiling
+      }
     }
     return statements;
   }
@@ -66,7 +72,12 @@ export function parse(code) {
       initializer = expression();
     }
     consume(SEMICOLON, "Expected semicolon");
-    return {class: "var", name:name, initializer: initializer, accept: (visitor) => visitor.visitVariableStatement(name, initializer)};
+    return {
+      class: "var",
+      name: name,
+      initializer: initializer,
+      accept: (visitor) => visitor.visitVariableStatement(name, initializer)
+    };
   }
 
   const statement = () => {
@@ -97,7 +108,7 @@ export function parse(code) {
     if (match(MOVING_PILLARS)) {
       return callStatement("moving_pillars");
     }
-    if (match(REPEAT)){
+    if (match(REPEAT)) {
       return call_block();
     }
     if (match(LEFT_BRACE)) {
@@ -130,7 +141,12 @@ export function parse(code) {
 
       if (expr.class === 'Variable') {
         let name = expr.name;
-        return {class: "assign", var_name: name, init_expr: value, accept: (visitor) => visitor.visitAssignExpr(name, value)};
+        return {
+          class: "assign",
+          var_name: name,
+          init_expr: value,
+          accept: (visitor) => visitor.visitAssignExpr(name, value)
+        };
       }
 
       throw error(equals, "Invalid assignment target.");
@@ -150,17 +166,21 @@ export function parse(code) {
     return {class: "call", accept: (visitor) => visitor.visitCallStatement(name, args)};
   }
 
-  const call_block = () =>{
+  const call_block = () => {
     const args = arg_expressions();
     consume(LEFT_BRACE, "Expect block");
     const action = block();
-    return {class: "block", accept: (visitor)=> visitor.visitParametrizedBlock(args, action)};
+    return {class: "block", accept: (visitor) => visitor.visitParametrizedBlock(args, action)};
   }
 
   const expressionStatement = () => {
     const value = expression();
     consume(SEMICOLON, "Expected semicolon");
-    return {class: "expressionStatement", expression: value, accept: (visitor) => visitor.visitExpressionStatement(value)};
+    return {
+      class: "expressionStatement",
+      expression: value,
+      accept: (visitor) => visitor.visitExpressionStatement(value)
+    };
   }
 
   const block = () => {
@@ -178,7 +198,13 @@ export function parse(code) {
       let operator = previous();
       let right = comparison();
       const left = expr;
-      expr = {class: "binaryExpr", operator: operator, left: expr, right: right, accept: (visitor) => visitor.visitBinaryExpr(operator, left, right)};
+      expr = {
+        class: "binaryExpr",
+        operator: operator,
+        left: expr,
+        right: right,
+        accept: (visitor) => visitor.visitBinaryExpr(operator, left, right)
+      };
     }
     return expr;
   }
@@ -189,7 +215,13 @@ export function parse(code) {
       let operator = previous();
       let right = term();
       const left = expr;
-      expr = {class: "binaryExpr", operator: operator, left: expr, right: right, accept: (visitor) => visitor.visitBinaryExpr(operator, left, right)};
+      expr = {
+        class: "binaryExpr",
+        operator: operator,
+        left: expr,
+        right: right,
+        accept: (visitor) => visitor.visitBinaryExpr(operator, left, right)
+      };
     }
     return expr;
   }
@@ -200,7 +232,13 @@ export function parse(code) {
       let operator = previous();
       let right = factor();
       const left = expr;
-      expr = {class: "binaryExpr", operator: operator, left: expr, right: right, accept: (visitor) => visitor.visitBinaryExpr(operator, left, right)};
+      expr = {
+        class: "binaryExpr",
+        operator: operator,
+        left: expr,
+        right: right,
+        accept: (visitor) => visitor.visitBinaryExpr(operator, left, right)
+      };
     }
     return expr;
   }
@@ -211,7 +249,13 @@ export function parse(code) {
       let operator = previous();
       let right = unary();
       const left = expr;
-      expr = {class: "binaryExpr", operator: operator, left: expr, right: right, accept: (visitor) => visitor.visitBinaryExpr(operator, left, right)};
+      expr = {
+        class: "binaryExpr",
+        operator: operator,
+        left: expr,
+        right: right,
+        accept: (visitor) => visitor.visitBinaryExpr(operator, left, right)
+      };
     }
     return expr;
   }
@@ -220,7 +264,12 @@ export function parse(code) {
     if (match(BANG, MINUS)) {
       let operator = previous();
       let right = unary();
-      return {class: "unaryExpr", operator: operator, right: right, accept: (visitor) => visitor.visitUnaryExpr(operator, right)};
+      return {
+        class: "unaryExpr",
+        operator: operator,
+        right: right,
+        accept: (visitor) => visitor.visitUnaryExpr(operator, right)
+      };
     }
     return primary();
   }
@@ -235,7 +284,7 @@ export function parse(code) {
     if (check(NUMBER)) {
       advance();
       let number = parseFloat(previous().literal);
-      return {class: "number", value:number, accept: (visitor) => visitor.visitLiteralExpr(number)};
+      return {class: "number", value: number, accept: (visitor) => visitor.visitLiteralExpr(number)};
     }
     if (check(STRING)) {
       advance();

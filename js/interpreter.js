@@ -39,12 +39,12 @@ export function interpret(init_env, code) {
 
     visitParametrizedBlock: (argList, statements) => {
       let args = argList.map(THIS.evaluate);
-      let start,end;
-      if (args.length===2){
+      let start, end;
+      if (args.length === 2) {
         start = args[0];
         end = args[1];
       } else {
-        start =0;
+        start = 0;
         end = args[0];
       }
       let previous = THIS.current_environment;
@@ -267,14 +267,8 @@ export function interpret(init_env, code) {
     }
   };
 
-  try {
-    const statements = parse(code);
-    for (let i = 0; i < statements.length; i++) {
-      THIS.execute(statements[i]);
-    }
-  } catch (e) {
-    console.log(e);
+  const statements = parse(code);
+  for (let i = 0; i < statements.length; i++) {
+    THIS.execute(statements[i]);
   }
-
-
 }
