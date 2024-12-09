@@ -15,8 +15,9 @@ import {
 import {atan, cos, random, sin, tan} from "./functions";
 
 export function interpret(init_env, code) {
-
+  const log_console = document.getElementById("log");
   let {canvas, tx, ty, tangle, unit, width, height} = init_env;
+  init_env.PI = Math.PI;
   const UP = "UP";
   const DOWN = "DOWN";
   const LEFT = "LEFT";
@@ -76,7 +77,7 @@ export function interpret(init_env, code) {
 
     visitPrintStatement: (expression) => {
       let value = THIS.evaluate(expression);
-      console.log(THIS.stringify(value));
+      log_console.innerText = THIS.stringify(value);
     },
 
     visitCallStatement: (fun, argList) => {
