@@ -10,7 +10,7 @@ export const scan = (source) => {
       scan_token();
     }
 
-    tokens.push({type: EOF, lexeme: "", line: line});
+    tokens.push({type: EOF, lexeme: "EOF", line: line});
     return tokens;
   };
 
@@ -107,8 +107,10 @@ export const scan = (source) => {
     }
     let text = source.substring(start, current);
     let type = keywords.get(text);
-
-    if (type == null) {
+    if (type === undefined) {
+      type = functions.get(text);
+    }
+    if (type === undefined) {
       type = IDENTIFIER;
     }
     add_token(type);
@@ -153,7 +155,7 @@ export const scan = (source) => {
     advance();
 
     let value = source.substring(start + 1, current - 1);
-    console.log("string "+value);
+    // console.log("string " + value);
     add_token(STRING, value);
   }
 
@@ -172,7 +174,7 @@ export const scan = (source) => {
     return source.charAt(current);
   }
 
-   const match = (expected) => {
+  const match = (expected) => {
     if (is_at_end()) {
       return false;
     }
@@ -242,6 +244,11 @@ export const PILLARS = 42;
 export const MOVING_PILLARS = 43;
 export const STAIRCASE = 44;
 export const REPEAT = 45;
+export const RANDOM = 46;
+export const COS = 47;
+export const SIN = 48;
+export const TAN = 49;
+export const ATAN = 50;
 
 export const keywords = new Map([
   ["and", AND],
@@ -265,4 +272,14 @@ export const keywords = new Map([
   ["moving_pillars", MOVING_PILLARS],
   ["staircase", STAIRCASE],
   ["repeat", REPEAT],
-])
+  ["random", RANDOM],
+]);
+
+export const functions = new Map([
+  ["random", RANDOM],
+  ["cos", COS],
+  ["sin", SIN],
+  ["tan", TAN],
+  ["atan", ATAN],
+]);
+

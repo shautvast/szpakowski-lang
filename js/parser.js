@@ -36,10 +36,12 @@ import {
   LEFT,
   RIGHT,
   TURN,
-  REPEAT
+  REPEAT, functions,
 } from "./scanner";
 
 export function parse(code) {
+  const log_console = document.getElementById("log");
+
   const tokens = scan(code);
   // console.log(tokens);
   let current = 0;
@@ -48,10 +50,12 @@ export function parse(code) {
     let statements = [];
 
     while (!is_at_end()) {
+      log_console.innerHTML = "OK";
       try {
         statements.push(declaration());
       } catch (e) {
-        console.log(e);
+        // console.log(e);
+        log_console.innerHTML = e;
         current = tokens.length - 1; // stop compiling
       }
     }
@@ -163,7 +167,7 @@ export function parse(code) {
   const callStatement = (name) => {
     const args = arg_expressions();
     consume(SEMICOLON, "Expected semicolon");
-    return {class: "call", accept: (visitor) => visitor.visitCallStatement(name, args)};
+    return {class: "call_stmt", accept: (visitor) => visitor.visitCallStatement(name, args)};
   }
 
   const call_block = () => {
@@ -271,6 +275,16 @@ export function parse(code) {
         accept: (visitor) => visitor.visitUnaryExpr(operator, right)
       };
     }
+    return fun();
+  }
+
+  const fun = () => {
+    let function_name = peek().lexeme;
+    if (functions.has(function_name)) {
+      advance();
+      let args = arg_expressions();
+      return {class: "call_fun", accept: (visitor) => visitor.visitCallFunction(function_name, args)};
+    }
     return primary();
   }
 
@@ -307,7 +321,7 @@ export function parse(code) {
     if (check(type)) {
       return advance();
     }
-    throw error(peek(), message);
+    throw error(peek(), message + " but was " + peek().lexeme);
   }
 
   const match = (...types) => {
@@ -322,7 +336,6 @@ export function parse(code) {
   }
 
   const check = (type) => {
-    // console.log(peek().type+"==="+type);
     if (is_at_end()) {
       return false;
     }

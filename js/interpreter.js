@@ -12,6 +12,7 @@ import {
   SLASH,
   STAR
 } from "./scanner";
+import {atan, cos, random, sin, tan} from "./functions";
 
 export function interpret(init_env, code) {
 
@@ -110,6 +111,22 @@ export function interpret(init_env, code) {
       }
     },
 
+    visitCallFunction: (name, argList) => {
+      let args = argList.map(THIS.evaluate);
+      switch (name) {
+        case "random":
+          return random(...args);
+        case "cos":
+          return cos(...args);
+        case "sin":
+          return sin(...args);
+        case "tan":
+          return tan(...args);
+        case "atan":
+          return atan(...args);
+      }
+    },
+
     start: (x, y) => {
       tx = x * unit;
       ty = y * unit;
@@ -159,11 +176,11 @@ export function interpret(init_env, code) {
       length += shift;
       for (let i = 0; i < n; i++) {
         THIS.turn(-90);
-        THIS.go(direction === DOWN ? -length2 : length2);
+        THIS.go(direction === UP ? -length2 : length2);
         THIS.turn(90);
         THIS.go(1);
         THIS.turn(90);
-        THIS.go(direction === DOWN ? -length : length);
+        THIS.go(direction === UP ? -length : length);
         THIS.turn(-90);
         THIS.go(1);
       }
@@ -269,6 +286,8 @@ export function interpret(init_env, code) {
 
   const statements = parse(code);
   for (let i = 0; i < statements.length; i++) {
+    // console.log(statements[i]);
     THIS.execute(statements[i]);
   }
 }
+

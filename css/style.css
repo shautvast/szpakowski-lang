@@ -1,48 +1,64 @@
 html {
-  color: #222;
   background: rgb(249,235,213);
   font-size: 1em;
   line-height: 1.4;
+  overflow: hidden;
 }
 
 #console {
   font: 13px monospace, sans-serif;
   padding: 5px;
-  color: greenyellow;
-  background: black;
+  color: black;
+  background:  rgb(255,241,219);
   position: fixed;
-  right: 10px;
-  bottom: 0;
-  width: 30%;
-  height: 20em;
+  right: 1px;
+  bottom: 4em;
+  width: 30em;
+  height: 90%;
   border: 2px solid darkgray;
   border-radius: 10px;
   z-index: 0;
 }
 
 #help{
-  background: black;
-  font: 13px monospace, sans-serif;
-  padding: 5px;
-  width: 90%;
-  color: greenyellow;
   position: absolute;
+  background:  rgb(249,235,213);
+  font: 13px monospace, sans-serif;
+  padding-left: 5px;
+  width: 90%;
+  color: black;
   z-index: 2;
+  scroll-behavior: auto;
+  overflow: auto;
+  border: none transparent;
 }
 
 #command_input {
-  background: black;
-  color: greenyellow;
+  background:  rgb(255,241,219);
+  color: black;
   outline: none;
   width: 90%;
-  height: 20em;
+  height: 99%;
   resize: none;
+}
+
+#log{
+    font: 13px monospace, sans-serif;
+    padding: 5px;
+    color: black;
+    background:  rgb(255,241,219);
+    position: fixed;
+    right: 1px;
+    bottom: 0;
+    width: 40em;
+    height: 2em;
+    border: 2px solid darkgray;
+    border-radius: 10px;
+    z-index: 0;
 }
 
 .multiline {
   border: none transparent;
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
 }
 
 .single_line {
