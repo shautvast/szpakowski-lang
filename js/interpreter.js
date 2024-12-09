@@ -77,7 +77,8 @@ export function interpret(init_env, code) {
 
     visitPrintStatement: (expression) => {
       let value = THIS.evaluate(expression);
-      log_console.innerText = THIS.stringify(value);
+      log_console.innerText += THIS.stringify(value) +"\n";
+      log_console.scrollTop = log_console.scrollHeight;
     },
 
     visitCallStatement: (fun, argList) => {

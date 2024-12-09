@@ -12,9 +12,9 @@ html {
   background:  rgb(255,241,219);
   position: fixed;
   right: 1px;
-  bottom: 4em;
+  bottom: 8em;
   width: 30em;
-  height: 90%;
+  height: 70%;
   border: 2px solid darkgray;
   border-radius: 10px;
   z-index: 0;
@@ -51,10 +51,11 @@ html {
     right: 1px;
     bottom: 0;
     width: 40em;
-    height: 2em;
+    height: 6em;
     border: 2px solid darkgray;
     border-radius: 10px;
     z-index: 0;
+    overflow: auto;
 }
 
 .multiline {
